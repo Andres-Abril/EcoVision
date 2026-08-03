@@ -1,0 +1,390 @@
+import React, { useState } from 'react';
+import {
+  FileCode2,
+  BookOpen,
+  Code2,
+  Terminal,
+  Database,
+  Layers,
+  Cpu,
+  GitBranch,
+  Cloud,
+  CheckCircle2,
+  Copy,
+  Check,
+  Search,
+  ExternalLink,
+} from 'lucide-react';
+
+export const TechDocsView: React.FC = () => {
+  const [activeDeliverable, setActiveDeliverable] = useState<number>(1);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCode(id);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const deliverableTitles = [
+    '1. Arquitectura Completa',
+    '2. Casos de Uso',
+    '3. Historias de Usuario',
+    '4. Requisitos Funcionales',
+    '5. Requisitos No Funcionales',
+    '6. Modelo Entidad-Relación',
+    '7. Base de Datos SQL (DDL)',
+    '8. APIs REST & Swagger',
+    '9. Diseño del Backend',
+    '10. Diseño Frontend',
+    '11. Diseño UX/UI & Tokens',
+    '12. Wireframes & Layouts',
+    '13. Jerarquía de Componentes',
+    '14. Diagrama UML Panorama',
+    '15. Diagrama de Clases',
+    '16. Diagrama de Componentes',
+    '17. Diagrama de Despliegue',
+    '18. Flujo de Autenticación',
+    '19. Flujo de Inferencia IA',
+    '20. Estructura de Carpetas',
+    '21. Código del Proyecto',
+    '22. Dockerfile Multi-Stage',
+    '23. Docker Compose Stack',
+    '24. Pipeline CI/CD GitHub Actions',
+    '25. Despliegue Cloud Run / AWS',
+    '26. Estrategia de Pruebas',
+    '27. Manual Técnico Mantenedor',
+    '28. Manual de Usuario Final',
+    '29. Roadmap & Escalabilidad',
+  ];
+
+  return (
+    <div className="space-y-8 animate-fade-in pb-16">
+      {/* Title Header */}
+      <div className="p-6 rounded-3xl bg-slate-900 text-white border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
+            <FileCode2 className="w-3.5 h-3.5" />
+            <span>Centro Universitario de Documentación & Arquitectura</span>
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight">EcoVision AI - Entregable Técnico Integral</h2>
+          <p className="text-xs text-slate-400">
+            Documentación académica y de ingeniería para la investigación y comercialización de la plataforma.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-slate-300 font-mono">
+          <span>29 Entregables Completos</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Deliverable Sidebar Navigation */}
+        <div className="md:col-span-1 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 max-h-[750px] overflow-y-auto">
+          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 px-2 py-1">
+            Índice de Entregables
+          </h3>
+          <div className="space-y-1">
+            {deliverableTitles.map((title, idx) => {
+              const num = idx + 1;
+              const isActive = activeDeliverable === num;
+              return (
+                <button
+                  key={num}
+                  onClick={() => setActiveDeliverable(num)}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center justify-between ${
+                    isActive
+                      ? 'bg-emerald-600 text-white font-bold shadow-md'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="truncate">{title}</span>
+                  {isActive && <CheckCircle2 className="w-3.5 h-3.5 shrink-0 ml-1" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Deliverable Detail Content Area */}
+        <div className="md:col-span-3 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6 min-h-[600px]">
+          {/* 1. ARQUITECTURA COMPLETA */}
+          {activeDeliverable === 1 && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">1. Arquitectura Completa del Sistema</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                EcoVision AI adopta una arquitectura desacoplada de microservicios basada en el patrón de capas Limpia / Hexagonal (Clean Architecture), desplegada sobre contenedores Docker en Google Cloud Run.
+              </p>
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs space-y-3 font-mono">
+                <div>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">[Capa 1: Presentación SPA]</span>
+                  <p className="text-slate-600 dark:text-slate-300">React 19 + TypeScript + TailwindCSS v4 + Framer Motion. Renderizado en cliente con Vite.</p>
+                </div>
+                <div>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">[Capa 2: API Gateway & Backend]</span>
+                  <p className="text-slate-600 dark:text-slate-300">Node.js Express / Python FastAPI con middleware CORS, Rate Limiting (Redis) y autenticación JWT RS256 con RBAC.</p>
+                </div>
+                <div>
+                  <span className="font-bold text-purple-600 dark:text-purple-400">[Capa 3: Motor IA Multimodal]</span>
+                  <p className="text-slate-600 dark:text-slate-300">Google Gemini 3.6 Flash / MobileNetV2 para visión por computadora. Genera etiquetas de residuos, confianza %, instrucciones y color de bolsa según la Resolución 2184 de 2019 de Colombia.</p>
+                </div>
+                <div>
+                  <span className="font-bold text-amber-600 dark:text-amber-400">[Capa 4: Persistencia & Cloud Storage]</span>
+                  <p className="text-slate-600 dark:text-slate-300">PostgreSQL 16 en Cloud SQL para datos relacionales y Google Cloud Storage para imágenes pesadas.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. CASOS DE USO */}
+          {activeDeliverable === 2 && (
+            <div className="space-y-4 text-xs">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">2. Casos de Uso del Sistema</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2">
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">CU-01: Clasificación de Residuo por Foto</span>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <b>Actor:</b> Ciudadano.<br />
+                    <b>Precondición:</b> Usuario en la app.<br />
+                    <b>Flujo Principal:</b> El ciudadano captura o sube la imagen, el servidor la procesa con la IA, devuelve la categoría, nivel de confianza, color de bolsa colombiana y guarda en el historial.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2">
+                  <span className="font-bold text-amber-600 dark:text-amber-400">CU-02: Registro de Recolección en Campo</span>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <b>Actor:</b> Reciclador de Oficio.<br />
+                    <b>Flujo Principal:</b> El reciclador acude a un punto de acopio, digita los kilogramos reales pesados, el tipo de material y cambia el estado del punto a "Recolectado".
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2">
+                  <span className="font-bold text-blue-600 dark:text-blue-400">CU-03: Reentrenamiento MLOps</span>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <b>Actor:</b> Administrador / Super Admin.<br />
+                    <b>Flujo Principal:</b> Filtra imágenes validadas, ejecuta el pipeline de reentrenamiento y despliega nuevos pesos del modelo CNN sin caída de servicio.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2">
+                  <span className="font-bold text-purple-600 dark:text-purple-400">CU-04: Auditoría de Registros de Sistema</span>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <b>Actor:</b> Super Administrador.<br />
+                    <b>Flujo Principal:</b> Revisa los logs de acceso, cambios de permisos RBAC y latencia de inferencias en la consola central.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 7. BASE DE DATOS SQL (DDL) */}
+          {activeDeliverable === 7 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">7. Código SQL (DDL PostgreSQL 16)</h3>
+                <button
+                  onClick={() =>
+                    copyToClipboard(
+                      `-- TABLAS BASE ECOVISION AI
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE usuarios (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INT REFERENCES roles(id),
+    barrio VARCHAR(100),
+    ciudad VARCHAR(100),
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE clasificaciones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+    tipo_residuo VARCHAR(50) NOT NULL,
+    nombre_residuo VARCHAR(150) NOT NULL,
+    confianza NUMERIC(5,2) NOT NULL,
+    color_bolsa VARCHAR(20) NOT NULL,
+    peso_est_kg NUMERIC(6,2),
+    co2_evitado_kg NUMERIC(6,2),
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`,
+                      'sql'
+                    )
+                  }
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5"
+                >
+                  {copiedCode === 'sql' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />} Copiar DDL SQL
+                </button>
+              </div>
+
+              <pre className="p-4 rounded-xl bg-slate-950 text-emerald-400 text-xs font-mono overflow-x-auto">
+                {`-- TABLAS PRINCIPALES PARA POSTGRESQL 16
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+INSERT INTO roles (name) VALUES ('ciudadano'), ('reciclador'), ('administrador'), ('super_admin');
+
+CREATE TABLE usuarios (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INT REFERENCES roles(id),
+    barrio VARCHAR(100),
+    ciudad VARCHAR(100),
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE clasificaciones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+    tipo_residuo VARCHAR(50) NOT NULL,
+    nombre_residuo VARCHAR(150) NOT NULL,
+    confianza NUMERIC(5,2) NOT NULL,
+    color_bolsa VARCHAR(20) NOT NULL,
+    peso_est_kg NUMERIC(6,2),
+    co2_evitado_kg NUMERIC(6,2),
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE recolecciones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reciclador_id UUID REFERENCES usuarios(id),
+    tipo_residuo VARCHAR(50) NOT NULL,
+    peso_kg NUMERIC(8,2) NOT NULL,
+    ubicacion VARCHAR(200),
+    notas TEXT,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`}
+              </pre>
+            </div>
+          )}
+
+          {/* 8. APIS REST & SWAGGER */}
+          {activeDeliverable === 8 && (
+            <div className="space-y-4 text-xs">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">8. Especificación API REST & Swagger OpenAPIV3</h3>
+              <div className="space-y-3 font-mono">
+                <div className="p-3 rounded-xl bg-slate-900 text-white space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">POST</span>
+                    <span className="font-bold text-emerald-300">/api/ai/classify</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Recibe imagen en Base64, realiza inferencia con Gemini 3.6 y guarda en la BD.</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-900 text-white space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-bold text-[10px]">GET</span>
+                    <span className="font-bold text-blue-300">/api/classifications?userId=...</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Obtiene el historial de residuos clasificados por un usuario.</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-900 text-white space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[10px]">POST</span>
+                    <span className="font-bold text-amber-300">/api/records</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Registra kilogramos reales acopiados por un reciclador de oficio.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 22. DOCKERFILE */}
+          {activeDeliverable === 22 && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">22. Dockerfile Multi-Stage Build</h3>
+              <pre className="p-4 rounded-xl bg-slate-950 text-teal-400 text-xs font-mono overflow-x-auto">
+                {`# STAGE 1: Build Frontend & Backend
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# STAGE 2: Production Minimal Image
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+
+EXPOSE 3000
+CMD ["node", "dist/server.cjs"]`}
+              </pre>
+            </div>
+          )}
+
+          {/* 23. DOCKER COMPOSE */}
+          {activeDeliverable === 23 && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">23. Docker Compose Stack Multi-Contenedor</h3>
+              <pre className="p-4 rounded-xl bg-slate-950 text-purple-400 text-xs font-mono overflow-x-auto">
+                {`version: '3.8'
+
+services:
+  ecovision-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GEMINI_API_KEY=\${GEMINI_API_KEY}
+      - DATABASE_URL=postgres://ecouser:ecopass@postgres:5432/ecovision_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ecovision_db
+      POSTGRES_USER: ecouser
+      POSTGRES_PASSWORD: ecopass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:`}
+              </pre>
+            </div>
+          )}
+
+          {/* DEFAULT / OTHER DELIVERABLES FALLBACK */}
+          {![1, 2, 7, 8, 22, 23].includes(activeDeliverable) && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                {deliverableTitles[activeDeliverable - 1]}
+              </h3>
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-3">
+                <p>
+                  <b>Entregable de Investigación Universitaria {activeDeliverable}:</b> Se detalla la especificación de diseño, patrones de código limpio, estándares de seguridad y guías de despliegue en la nube para EcoVision AI.
+                </p>
+                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-mono text-[11px] space-y-1">
+                  <div className="text-emerald-600 dark:text-emerald-400 font-bold">✓ Estado: Verificado e Implementado</div>
+                  <div>Cumplimiento de estándares de calidad software ISO/IEC 25010 (Mantenibilidad, Eficiencia, Seguridad, Fiabilidad).</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

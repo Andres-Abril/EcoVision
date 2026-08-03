@@ -1,0 +1,361 @@
+import React, { useState } from 'react';
+import { User, ClassificationResult, DatasetSample, IncidentReport } from '../types';
+import {
+  BarChart3,
+  Users,
+  Database,
+  Cpu,
+  ShieldAlert,
+  Sliders,
+  CheckCircle2,
+  TrendingUp,
+  Activity,
+  Layers,
+  Sparkles,
+  RefreshCw,
+  Search,
+  FileSpreadsheet,
+  AlertOctagon,
+} from 'lucide-react';
+
+interface AdminViewProps {
+  users: User[];
+  classifications: ClassificationResult[];
+  dataset: DatasetSample[];
+  incidents: IncidentReport[];
+  onUpdateUserRole: (userId: string, newRole: any) => void;
+}
+
+export const AdminView: React.FC<AdminViewProps> = ({
+  users,
+  classifications,
+  dataset,
+  incidents,
+  onUpdateUserRole,
+}) => {
+  const [activeAdminTab, setActiveAdminTab] = useState<'metrics' | 'users' | 'dataset' | 'incidents'>('metrics');
+  const [userSearch, setUserSearch] = useState('');
+  const [isRetraining, setIsRetraining] = useState(false);
+  const [retrainSuccess, setRetrainSuccess] = useState(false);
+
+  // Compute breakdown stats
+  const categoryCounts: Record<string, number> = {};
+  classifications.forEach((c) => {
+    categoryCounts[c.wasteType] = (categoryCounts[c.wasteType] || 0) + 1;
+  });
+
+  const totalKg = classifications.reduce((acc, c) => acc + c.estimatedWeightKg, 0).toFixed(1);
+  const totalCo2 = classifications.reduce((acc, c) => acc + c.co2AvoidedKg, 0).toFixed(1);
+  const avgConf = classifications.length
+    ? (classifications.reduce((acc, c) => acc + c.confidence, 0) / classifications.length).toFixed(1)
+    : '95.4';
+
+  const filteredUsers = users.filter(
+    (u) => u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase())
+  );
+
+  const handleSimulateRetrain = () => {
+    setIsRetraining(true);
+    setRetrainSuccess(false);
+    setTimeout(() => {
+      setIsRetraining(false);
+      setRetrainSuccess(true);
+      setTimeout(() => setRetrainSuccess(false), 4000);
+    }, 2500);
+  };
+
+  return (
+    <div className="space-y-8 animate-fade-in pb-12">
+      {/* Admin Title & Navigation Header */}
+      <div className="p-6 rounded-3xl bg-slate-900 text-white border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/30">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Panel de Control Administrativo & IA</span>
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight">Centro de Analítica EcoVision AI</h2>
+          <p className="text-xs text-slate-400">
+            Supervisión de indicadores ambientales, modelo de aprendizaje profundo MobileNetV2/Gemini y usuarios.
+          </p>
+        </div>
+
+        {/* Sub-tabs */}
+        <div className="flex flex-wrap gap-1 bg-slate-800/90 p-1.5 rounded-2xl border border-slate-700 text-xs font-semibold">
+          <button
+            onClick={() => setActiveAdminTab('metrics')}
+            className={`px-3 py-2 rounded-xl transition ${
+              activeAdminTab === 'metrics' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Métricas & IA
+          </button>
+          <button
+            onClick={() => setActiveAdminTab('users')}
+            className={`px-3 py-2 rounded-xl transition ${
+              activeAdminTab === 'users' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Usuarios ({users.length})
+          </button>
+          <button
+            onClick={() => setActiveAdminTab('dataset')}
+            className={`px-3 py-2 rounded-xl transition ${
+              activeAdminTab === 'dataset' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Dataset ({dataset.length})
+          </button>
+          <button
+            onClick={() => setActiveAdminTab('incidents')}
+            className={`px-3 py-2 rounded-xl transition ${
+              activeAdminTab === 'incidents' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Incidencias ({incidents.length})
+          </button>
+        </div>
+      </div>
+
+      {/* TAB 1: METRICS & IA ENGINE */}
+      {activeAdminTab === 'metrics' && (
+        <div className="space-y-6">
+          {/* Top KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-xs font-semibold text-slate-500 block mb-1">Precisión Promedio IA</span>
+              <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{avgConf}%</span>
+              <span className="text-xs text-slate-400 block mt-1">mAP @ IoU=0.5</span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-xs font-semibold text-slate-500 block mb-1">Residuos Clasificados</span>
+              <span className="text-2xl font-bold text-slate-900 dark:text-white">{classifications.length}</span>
+              <span className="text-xs text-slate-400 block mt-1">imágenes procesadas</span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-xs font-semibold text-slate-500 block mb-1">Material Total</span>
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalKg}</span>
+              <span className="text-xs text-slate-400 block mt-1">Kg recuperados</span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <span className="text-xs font-semibold text-slate-500 block mb-1">CO₂ Evitado Total</span>
+              <span className="text-2xl font-bold text-teal-600 dark:text-teal-400">{totalCo2}</span>
+              <span className="text-xs text-slate-400 block mt-1">Kg CO₂ equivalente</span>
+            </div>
+          </div>
+
+          {/* Graphical Distributions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Category Bar Chart */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-blue-500" /> Distribución por Tipo de Residuo
+              </h3>
+
+              <div className="space-y-3 pt-2">
+                {Object.entries(categoryCounts).map(([cat, count]) => {
+                  const percent = Math.round((count / classifications.length) * 100) || 10;
+                  return (
+                    <div key={cat} className="space-y-1 text-xs">
+                      <div className="flex justify-between font-semibold">
+                        <span className="capitalize text-slate-700 dark:text-slate-300">{cat}</span>
+                        <span className="text-slate-500">{count} ítems ({percent}%)</span>
+                      </div>
+                      <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* AI Model Architecture Card & Retrain Trigger */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <Cpu className="w-4 h-4 text-purple-500" /> Motor de Visión Artificial
+                  </h3>
+                  <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-bold">
+                    MobileNetV2 / EfficientNet + Gemini 3.6
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Red Neuronal Convolucional (CNN) entrenada sobre el dataset TrashNet + Imágenes regionales colombianas. Desplegada en Google Cloud Run / FastAPI.
+                </p>
+
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Tamaño de Entrada:</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">224 x 224 x 3</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Latencia Inferencia Mediana:</span>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">138 ms</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Pérdida en Validación (Loss):</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">0.084</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <button
+                  onClick={handleSimulateRetrain}
+                  disabled={isRetraining}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/20 transition disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRetraining ? 'animate-spin' : ''}`} />
+                  <span>{isRetraining ? 'Reentrenando Red Neuronal...' : 'Disparar Reentrenamiento Automático MLOps'}</span>
+                </button>
+
+                {retrainSuccess && (
+                  <p className="text-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 animate-fade-in flex items-center justify-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> ¡Modelo reentrenado exitosamente! Nuevos pesos actualizados en el Registry.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: USERS MANAGEMENT */}
+      {activeAdminTab === 'users' && (
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-500" /> Control de Usuarios & Roles (RBAC)
+              </h3>
+              <p className="text-xs text-slate-500">Gestión de permisos independientes para Ciudadanos, Recicladores y Administradores</p>
+            </div>
+
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar usuario o email..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+              <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase text-[10px] font-bold">
+                <tr>
+                  <th className="p-3 rounded-l-xl">Usuario</th>
+                  <th className="p-3">Email</th>
+                  <th className="p-3">Ubicación</th>
+                  <th className="p-3">Rol Actual</th>
+                  <th className="p-3 rounded-r-xl">Cambiar Rol</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredUsers.map((u) => (
+                  <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    <td className="p-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                      <img src={u.avatar} alt={u.name} className="w-7 h-7 rounded-full object-cover" />
+                      <span>{u.name}</span>
+                    </td>
+                    <td className="p-3 text-slate-500">{u.email}</td>
+                    <td className="p-3 text-slate-500">{u.neighborhood}, {u.city}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <select
+                        value={u.role}
+                        onChange={(e) => onUpdateUserRole(u.id, e.target.value)}
+                        className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
+                      >
+                        <option value="ciudadano">Ciudadano</option>
+                        <option value="reciclador">Reciclador</option>
+                        <option value="administrador">Administrador</option>
+                        <option value="super_admin">Super Admin</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: DATASET MANAGER */}
+      {activeAdminTab === 'dataset' && (
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Database className="w-5 h-5 text-purple-500" /> Módulo de Dataset para Visión Artificial
+              </h3>
+              <p className="text-xs text-slate-500">Muestras verificadas de entrenamiento, validación y prueba para la CNN</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {dataset.map((ds) => (
+              <div key={ds.id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{ds.split.toUpperCase()}</span>
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                    Verificado
+                  </span>
+                </div>
+                <p className="font-bold text-slate-900 dark:text-white truncate">{ds.filename}</p>
+                <div className="flex justify-between text-slate-500 text-[11px]">
+                  <span>Categoría: <b>{ds.category}</b></span>
+                  <span>Dim: {ds.dimensions}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: INCIDENTS */}
+      {activeAdminTab === 'incidents' && (
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
+          <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-red-500" /> Reporte de Novedades Operativas
+          </h3>
+
+          <div className="space-y-3">
+            {incidents.map((inc) => (
+              <div key={inc.id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">{inc.title}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                    inc.severity === 'alta' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    Severidad: {inc.severity}
+                  </span>
+                </div>
+                <p className="text-slate-600 dark:text-slate-300">{inc.description}</p>
+                <div className="flex justify-between text-slate-400 text-[11px] pt-1 border-t border-slate-200 dark:border-slate-800">
+                  <span>Reportado por: <b>{inc.reporterName}</b> ({inc.reporterRole})</span>
+                  <span>Estado: <b className="capitalize text-blue-600 dark:text-blue-400">{inc.status}</b></span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

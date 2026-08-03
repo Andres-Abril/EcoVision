@@ -1,0 +1,153 @@
+import React, { useState, useEffect } from 'react';
+import { UserRole, User, ClassificationResult, CollectionPoint, CollectionRecord, IncidentReport, DatasetSample, SystemLog } from './types';
+import { INITIAL_USERS, INITIAL_CLASSIFICATIONS, INITIAL_POINTS, INITIAL_RECORDS, INITIAL_INCIDENTS, INITIAL_DATASET, INITIAL_LOGS } from './data/initialData';
+import { Navbar } from './components/Navbar';
+import { CitizenView } from './components/CitizenView';
+import { RecyclerView } from './components/RecyclerView';
+import { AdminView } from './components/AdminView';
+import { SuperAdminView } from './components/SuperAdminView';
+import { TechDocsView } from './components/TechDocsView';
+import { WasteClassifierModal } from './components/WasteClassifierModal';
+
+export default function App() {
+  const [currentRole, setCurrentRole] = useState<UserRole>('ciudadano');
+  const [activeTab, setActiveTab] = useState<string>('ciudadano');
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [isScanModalOpen, setIsScanModalOpen] = useState<boolean>(false);
+
+  // App State initialized with realistic data
+  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+  const [classifications, setClassifications] = useState<ClassificationResult[]>(INITIAL_CLASSIFICATIONS);
+  const [points, setPoints] = useState<CollectionPoint[]>(INITIAL_POINTS);
+  const [records, setRecords] = useState<CollectionRecord[]>(INITIAL_RECORDS);
+  const [incidents, setIncidents] = useState<IncidentReport[]>(INITIAL_INCIDENTS);
+  const [dataset] = useState<DatasetSample[]>(INITIAL_DATASET);
+  const [logs] = useState<SystemLog[]>(INITIAL_LOGS);
+
+  // Synchronize dark mode class on <html> element
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
+  // Current user based on role
+  const currentUser = users.find((u) => u.role === currentRole) || users[0];
+
+  const handleRoleChange = (role: UserRole) => {
+    setCurrentRole(role);
+  };
+
+  const handleClassified = (result: ClassificationResult) => {
+    setClassifications((prev) => [result, ...prev]);
+  };
+
+  const handleAddRecord = (record: Partial<CollectionRecord>) => {
+    const newRecord: CollectionRecord = {
+      id: `rec-${Date.now()}`,
+      recyclerId: currentUser.id,
+      recyclerName: currentUser.name,
+      wasteType: record.wasteType || 'carton',
+      weightKg: record.weightKg || 10,
+      location: record.location || 'Medellín',
+      notes: record.notes,
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    };
+    setRecords((prev) => [newRecord, ...prev]);
+
+    // Update point status if pointId present
+    if (record.pointId) {
+      setPoints((prev) =>
+        prev.map((p) => (p.id === record.pointId ? { ...p, status: 'recolectado' } : p))
+      );
+    }
+  };
+
+  const handleAddIncident = (inc: Partial<IncidentReport>) => {
+    const newInc: IncidentReport = {
+      id: `inc-${Date.now()}`,
+      reporterId: currentUser.id,
+      reporterName: currentUser.name,
+      reporterRole: currentRole,
+      title: inc.title || 'Novedad en contenedor',
+      description: inc.description || 'Detalle no proporcionado',
+      category: inc.category || 'contaminacion',
+      severity: inc.severity || 'media',
+      status: 'abierto',
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    };
+    setIncidents((prev) => [newInc, ...prev]);
+  };
+
+  const handleUpdateUserRole = (userId: string, newRole: UserRole) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+      {/* Top Navigation Bar */}
+      <Navbar
+        currentRole={currentRole}
+        onRoleChange={handleRoleChange}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode(!darkMode)}
+        onOpenQuickScan={() => setIsScanModalOpen(true)}
+      />
+
+      {/* Main Container */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        {activeTab === 'ciudadano' && (
+          <CitizenView
+            currentUser={currentUser}
+            classifications={classifications}
+            onOpenScanModal={() => setIsScanModalOpen(true)}
+          />
+        )}
+
+        {activeTab === 'reciclador' && (
+          <RecyclerView
+            currentUser={currentUser}
+            points={points}
+            records={records}
+            incidents={incidents}
+            onAddRecord={handleAddRecord}
+            onAddIncident={handleAddIncident}
+          />
+        )}
+
+        {activeTab === 'admin' && (
+          <AdminView
+            users={users}
+            classifications={classifications}
+            dataset={dataset}
+            incidents={incidents}
+            onUpdateUserRole={handleUpdateUserRole}
+          />
+        )}
+
+        {activeTab === 'super_admin' && (
+          <SuperAdminView logs={logs} />
+        )}
+
+        {activeTab === 'docs' && (
+          <TechDocsView />
+        )}
+      </main>
+
+      {/* Interactive AI Waste Classifier Modal */}
+      <WasteClassifierModal
+        isOpen={isScanModalOpen}
+        onClose={() => setIsScanModalOpen(false)}
+        onClassified={handleClassified}
+        userId={currentUser.id}
+        userName={currentUser.name}
+      />
+    </div>
+  );
+}
